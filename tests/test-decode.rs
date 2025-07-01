@@ -3,6 +3,7 @@ mod common;
 #[cfg(not(feature = "external-browser-authenticator"))]
 use snowflake_connector_rs::Result;
 
+#[cfg(not(feature = "external-browser-authenticator"))]
 #[tokio::test]
 async fn test_decode() -> Result<()> {
     // Connect to Snowflake

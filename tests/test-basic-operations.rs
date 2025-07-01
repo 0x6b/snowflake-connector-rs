@@ -22,6 +22,7 @@ async fn test_decode_naive_date() -> Result<()> {
     Ok(())
 }
 
+#[cfg(not(feature = "external-browser-authenticator"))]
 #[tokio::test]
 async fn test_basic_operations() -> Result<()> {
     // Connect to Snowflake
