@@ -79,6 +79,8 @@ pub enum SnowflakeAuthMethod {
         encrypted_pem: String,
         password: Vec<u8>,
     },
+    #[cfg(feature = "external-browser-authenticator")]
+    ExternalBrowser,
 }
 
 impl SnowflakeClient {

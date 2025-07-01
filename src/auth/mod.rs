@@ -1,4 +1,6 @@
 mod key_pair;
+#[cfg(feature = "external-browser-authenticator")]
+mod external_browser;
 
 use chrono::Utc;
 use reqwest::Client;
@@ -7,6 +9,8 @@ use serde_json::{json, Value};
 use crate::{Error, Result, SnowflakeAuthMethod, SnowflakeClientConfig};
 
 use self::key_pair::generate_jwt_from_key_pair;
+#[cfg(feature = "external-browser-authenticator")]
+use self::external_browser::authenticate_via_browser;
 
 /// Login to Snowflake and return a session token.
 pub(super) async fn login(
@@ -15,6 +19,11 @@ pub(super) async fn login(
     auth: &SnowflakeAuthMethod,
     config: &SnowflakeClientConfig,
 ) -> Result<String> {
+    #[cfg(feature = "external-browser-authenticator")]
+    if matches!(auth, SnowflakeAuthMethod::ExternalBrowser) {
+        return authenticate_via_browser(http, &config.account, username).await;
+    }
+
     let url = format!(
         "https://{account}.snowflakecomputing.com/session/v1/login-request",
         account = config.account
@@ -85,6 +94,10 @@ fn login_request_data(
                 "TOKEN": jwt,
                 "AUTHENTICATOR": "SNOWFLAKE_JWT"
             }))
+        }
+        #[cfg(feature = "external-browser-authenticator")]
+        SnowflakeAuthMethod::ExternalBrowser => {
+            unreachable!("External browser authentication is handled separately")
         }
     }
 }

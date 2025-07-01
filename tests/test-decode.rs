@@ -1,5 +1,6 @@
 mod common;
 
+#[cfg(not(feature = "external-browser-authenticator"))]
 use snowflake_connector_rs::Result;
 
 #[tokio::test]
