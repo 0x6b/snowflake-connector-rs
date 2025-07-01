@@ -43,14 +43,12 @@ mod session;
 
 use std::time::Duration;
 
+use auth::login;
 pub use error::{Error, Result};
 pub use query::QueryExecutor;
+use reqwest::{Client, ClientBuilder, Proxy};
 pub use row::{SnowflakeColumn, SnowflakeColumnType, SnowflakeDecode, SnowflakeRow};
 pub use session::SnowflakeSession;
-
-use auth::login;
-
-use reqwest::{Client, ClientBuilder, Proxy};
 
 #[derive(Clone)]
 pub struct SnowflakeClient {
@@ -99,8 +97,8 @@ impl SnowflakeClient {
     }
 
     pub fn with_proxy(self, host: &str, port: u16, username: &str, password: &str) -> Result<Self> {
-        let proxy = Proxy::all(format!("http://{host}:{port}").as_str())?
-            .basic_auth(username, password);
+        let proxy =
+            Proxy::all(format!("http://{host}:{port}").as_str())?.basic_auth(username, password);
 
         let client = ClientBuilder::new()
             .gzip(true)

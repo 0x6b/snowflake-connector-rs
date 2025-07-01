@@ -1,16 +1,15 @@
-mod key_pair;
 #[cfg(feature = "external-browser-authenticator")]
 mod external_browser;
+mod key_pair;
 
 use chrono::Utc;
 use reqwest::Client;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 
-use crate::{Error, Result, SnowflakeAuthMethod, SnowflakeClientConfig};
-
-use self::key_pair::generate_jwt_from_key_pair;
 #[cfg(feature = "external-browser-authenticator")]
 use self::external_browser::authenticate_via_browser;
+use self::key_pair::generate_jwt_from_key_pair;
+use crate::{Error, Result, SnowflakeAuthMethod, SnowflakeClientConfig};
 
 /// Login to Snowflake and return a session token.
 pub(super) async fn login(
@@ -77,10 +76,7 @@ fn login_request_data(
             "PASSWORD": password,
             "ACCOUNT_NAME": config.account
         })),
-        SnowflakeAuthMethod::KeyPair {
-            encrypted_pem,
-            password,
-        } => {
+        SnowflakeAuthMethod::KeyPair { encrypted_pem, password } => {
             let jwt = generate_jwt_from_key_pair(
                 encrypted_pem,
                 password,
@@ -107,7 +103,7 @@ struct LoginResponse {
     token: String,
 }
 
-#[derive(serde:: Deserialize)]
+#[derive(serde::Deserialize)]
 struct Response {
     data: LoginResponse,
     message: Option<String>,

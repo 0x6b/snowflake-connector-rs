@@ -36,10 +36,7 @@ async fn main() -> Result<()> {
 
             // Try a simple query
             let rows = session.query("SELECT CURRENT_USER()").await?;
-            println!(
-                "Current user: {:?}",
-                rows[0].get::<String>("CURRENT_USER()")?
-            );
+            println!("Current user: {:?}", rows[0].get::<String>("CURRENT_USER()")?);
 
             Ok(())
         }

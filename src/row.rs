@@ -77,11 +77,8 @@ impl SnowflakeRow {
         names.into_iter().map(|(name, _)| name.as_str()).collect()
     }
     pub fn column_types(&self) -> Vec<SnowflakeColumn> {
-        let mut names: Vec<(String, usize)> = self
-            .column_indices
-            .iter()
-            .map(|(k, v)| (k.clone(), *v))
-            .collect();
+        let mut names: Vec<(String, usize)> =
+            self.column_indices.iter().map(|(k, v)| (k.clone(), *v)).collect();
         names.sort_by_key(|(_, v)| *v);
         names
             .into_iter()
@@ -220,9 +217,7 @@ fn parse_timestamp_tz(s: &str, scale: i64) -> Result<NaiveDateTime> {
         .parse::<i64>()
         .map_err(|_| Error::Decode(format!("invalid timestamp_tz: {s}")))?;
     if !(0..=2880).contains(&tz) {
-        return Err(Error::Decode(format!(
-            "invalid timezone for timestamp_tz: {s}"
-        )));
+        return Err(Error::Decode(format!("invalid timezone for timestamp_tz: {s}")));
     }
     // subtract 24 hours from the timezone to map [0, 48] to [-24, 24]
     let min_addend = 1440 - tz;
@@ -307,7 +302,5 @@ impl TryGet for (&Option<String>, &SnowflakeColumnType) {
 }
 
 fn unwrap(value: &Option<String>) -> Result<&String> {
-    value
-        .as_ref()
-        .ok_or_else(|| Error::Decode("value is null".into()))
+    value.as_ref().ok_or_else(|| Error::Decode("value is null".into()))
 }

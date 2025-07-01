@@ -1,4 +1,4 @@
-use base64::{engine::general_purpose::STANDARD, Engine};
+use base64::{Engine, engine::general_purpose::STANDARD};
 use jsonwebtoken::{Algorithm, EncodingKey, Header};
 use pkcs8::{DecodePrivateKey, EncodePrivateKey, EncodePublicKey, LineEnding};
 use rsa::RsaPrivateKey;
@@ -36,10 +36,7 @@ pub(super) fn generate_jwt_from_key_pair(
     });
     let key = EncodingKey::from_rsa_pem(private.to_pkcs8_pem(LineEnding::LF)?.as_bytes())?;
     let jwt = jsonwebtoken::encode(
-        &Header {
-            alg: Algorithm::RS256,
-            ..Default::default()
-        },
+        &Header { alg: Algorithm::RS256, ..Default::default() },
         &payload,
         &key,
     )?;

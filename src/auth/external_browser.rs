@@ -1,8 +1,11 @@
+use std::{
+    sync::{Arc, Mutex},
+    time::Duration,
+};
+
 use axum::{Router, extract::Query, response::Html, routing::get};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
-use std::sync::{Arc, Mutex};
-use std::time::Duration;
 use tokio::{net::TcpListener, time::timeout};
 
 use crate::{Error, Result};
@@ -91,9 +94,7 @@ pub async fn authenticate_via_browser(
     match result {
         Ok(Ok(token)) => validate_saml_response(http, account, username, &token, &proof_key).await,
         Ok(Err(e)) => Err(e),
-        Err(_) => Err(Error::Communication(
-            "Browser authentication timeout".into(),
-        )),
+        Err(_) => Err(Error::Communication("Browser authentication timeout".into())),
     }
 }
 
@@ -121,18 +122,14 @@ async fn get_sso_url(
     let body = response.text().await?;
 
     if !status.is_success() {
-        return Err(Error::Communication(format!(
-            "Failed to get SSO URL: {body}"
-        )));
+        return Err(Error::Communication(format!("Failed to get SSO URL: {body}")));
     }
 
     let resp: AuthResponse = serde_json::from_str(&body)
         .map_err(|_| Error::Communication(format!("Invalid response: {body}")))?;
 
     if !resp.success {
-        return Err(Error::Communication(
-            resp.message.unwrap_or_else(|| "Unknown error".into()),
-        ));
+        return Err(Error::Communication(resp.message.unwrap_or_else(|| "Unknown error".into())));
     }
 
     Ok((resp.data.sso_url, resp.data.proof_key))
@@ -161,9 +158,7 @@ async fn validate_saml_response(
     let body = response.text().await?;
 
     if !status.is_success() {
-        return Err(Error::Communication(format!(
-            "Failed to validate SAML response: {body}"
-        )));
+        return Err(Error::Communication(format!("Failed to validate SAML response: {body}")));
     }
 
     let resp: serde_json::Value = serde_json::from_str(&body)
@@ -172,8 +167,6 @@ async fn validate_saml_response(
     match (resp["success"].as_bool(), resp["data"]["token"].as_str()) {
         (Some(true), Some(token)) => Ok(token.into()),
         (Some(true), None) => Err(Error::Communication("No session token in response".into())),
-        _ => Err(Error::Communication(
-            resp["message"].as_str().unwrap_or("Unknown error").into(),
-        )),
+        _ => Err(Error::Communication(resp["message"].as_str().unwrap_or("Unknown error").into())),
     }
 }
