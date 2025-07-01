@@ -1,7 +1,9 @@
 mod common;
 
+#[cfg(not(feature = "external-browser-authenticator"))]
 use snowflake_connector_rs::Result;
 
+#[cfg(not(feature = "external-browser-authenticator"))]
 #[tokio::test]
 async fn test_decode() -> Result<()> {
     // Connect to Snowflake
@@ -16,10 +18,7 @@ async fn test_decode() -> Result<()> {
     )";
     let rows = session.query(query).await?;
     assert_eq!(rows.len(), 1);
-    assert_eq!(
-        rows[0].get::<String>("STATUS")?,
-        "Table EXAMPLE successfully created."
-    );
+    assert_eq!(rows[0].get::<String>("STATUS")?, "Table EXAMPLE successfully created.");
 
     // Insert some data
     let query = "INSERT INTO example (n, s, b, d, tm, ltz, ntz, tz) VALUES (

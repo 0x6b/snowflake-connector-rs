@@ -22,6 +22,7 @@ async fn test_decode_naive_date() -> Result<()> {
     Ok(())
 }
 
+#[cfg(not(feature = "external-browser-authenticator"))]
 #[tokio::test]
 async fn test_basic_operations() -> Result<()> {
     // Connect to Snowflake
@@ -32,10 +33,7 @@ async fn test_basic_operations() -> Result<()> {
     let query = "CREATE TEMPORARY TABLE example (id NUMBER, value STRING)";
     let rows = session.query(query).await?;
     assert_eq!(rows.len(), 1);
-    assert_eq!(
-        rows[0].get::<String>("STATUS")?,
-        "Table EXAMPLE successfully created."
-    );
+    assert_eq!(rows[0].get::<String>("STATUS")?, "Table EXAMPLE successfully created.");
 
     // Insert some data
     let query = "INSERT INTO example (id, value) VALUES (1, 'hello'), (2, 'world')";

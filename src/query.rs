@@ -1,17 +1,19 @@
-use std::time::{Duration, Instant};
-use std::{collections::HashMap, sync::Arc};
+use std::{
+    collections::HashMap,
+    sync::Arc,
+    time::{Duration, Instant},
+};
 
 use http::{
-    header::{ACCEPT, AUTHORIZATION},
     HeaderMap,
+    header::{ACCEPT, AUTHORIZATION},
 };
 use reqwest::Client;
-use tokio::sync::Mutex;
-use tokio::time::sleep;
+use tokio::{sync::Mutex, time::sleep};
 
-use crate::row::SnowflakeColumnType;
-use crate::SnowflakeSession;
-use crate::{chunk::download_chunk, Error, Result, SnowflakeRow};
+use crate::{
+    Error, Result, SnowflakeRow, SnowflakeSession, chunk::download_chunk, row::SnowflakeColumnType,
+};
 
 pub(super) const SESSION_EXPIRED: &str = "390112";
 pub(super) const QUERY_IN_PROGRESS_CODE: &str = "333333";
@@ -33,12 +35,7 @@ impl QueryExecutor {
         sess: &SnowflakeSession,
         request: Q,
     ) -> Result<Self> {
-        let SnowflakeSession {
-            http,
-            account,
-            session_token,
-            timeout,
-        } = sess;
+        let SnowflakeSession { http, account, session_token, timeout } = sess;
         let timeout = timeout.unwrap_or(Duration::from_secs(DEFAULT_TIMEOUT_SECONDS));
 
         let request_id = uuid::Uuid::new_v4();
@@ -50,10 +47,7 @@ impl QueryExecutor {
         let response = http
             .post(url)
             .header(ACCEPT, "application/snowflake")
-            .header(
-                AUTHORIZATION,
-                format!(r#"Snowflake Token="{}""#, session_token),
-            )
+            .header(AUTHORIZATION, format!(r#"Snowflake Token="{session_token}""#))
             .json(&request)
             .send()
             .await?;
@@ -220,15 +214,12 @@ async fn poll_for_async_results(
     let start = Instant::now();
     while start.elapsed() < timeout {
         sleep(Duration::from_secs(10)).await;
-        let url = format!("https://{account}.snowflakecomputing.com{}", result_url);
+        let url = format!("https://{account}.snowflakecomputing.com{result_url}");
 
         let resp = http
             .get(url)
             .header(ACCEPT, "application/snowflake")
-            .header(
-                AUTHORIZATION,
-                format!(r#"Snowflake Token="{}""#, session_token),
-            )
+            .header(AUTHORIZATION, format!(r#"Snowflake Token="{session_token}""#))
             .send()
             .await?;
 
@@ -258,9 +249,7 @@ pub struct QueryRequest {
 
 impl From<&str> for QueryRequest {
     fn from(sql_text: &str) -> Self {
-        Self {
-            sql_text: sql_text.to_string(),
-        }
+        Self { sql_text: sql_text.to_string() }
     }
 }
 impl From<&QueryRequest> for QueryRequest {
