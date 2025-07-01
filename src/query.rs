@@ -52,7 +52,7 @@ impl QueryExecutor {
             .header(ACCEPT, "application/snowflake")
             .header(
                 AUTHORIZATION,
-                format!(r#"Snowflake Token="{}""#, session_token),
+                format!(r#"Snowflake Token="{session_token}""#),
             )
             .json(&request)
             .send()
@@ -220,14 +220,14 @@ async fn poll_for_async_results(
     let start = Instant::now();
     while start.elapsed() < timeout {
         sleep(Duration::from_secs(10)).await;
-        let url = format!("https://{account}.snowflakecomputing.com{}", result_url);
+        let url = format!("https://{account}.snowflakecomputing.com{result_url}");
 
         let resp = http
             .get(url)
             .header(ACCEPT, "application/snowflake")
             .header(
                 AUTHORIZATION,
-                format!(r#"Snowflake Token="{}""#, session_token),
+                format!(r#"Snowflake Token="{session_token}""#),
             )
             .send()
             .await?;
